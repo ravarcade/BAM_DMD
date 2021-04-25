@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 /**
  * New BAM.h
@@ -64,6 +65,7 @@ namespace BAM {
 		typedef BAMIMPORT void BAM_DetachDetour_func(void **ppPointer, void *pDetour);
 
 		typedef BAMIMPORT unsigned int BAM_compileShaders_func(const char *vertexShaderSrc, const char *fragmentShaderSrc);
+		typedef BAMIMPORT void *BAM_GetAllFPObjects_func();
 
 
 		// debug
@@ -124,6 +126,7 @@ namespace BAM {
 		BAM_DetachDetour_func             *BAM_DetachDetour;
 
 		BAM_compileShaders_func           *BAM_compileShaders;
+		BAM_GetAllFPObjects_func          *BAM_GetAllFPObjects;
 	};
 
 	template<typename T>
@@ -139,6 +142,13 @@ namespace BAM {
 		return st.t;
 	}
 
+	inline std::string wtoa(std::wstring w)
+	{
+		std::string result;
+		for (wchar_t x : w)
+			result += (char)x;
+		return result;
+	}
 
 	inline void Init (int pluginID, HMODULE bam_module) {
 		Internal()._pluginID = pluginID;
@@ -199,6 +209,7 @@ namespace BAM {
 		Internal().BAM_DetachDetour              = (SInternal::BAM_DetachDetour_func *)              GetProcAddress(bam_module, "BAM_DetachDetour");
 
 		Internal().BAM_compileShaders            = (SInternal::BAM_compileShaders_func *)            GetProcAddress(bam_module, "BAM_compileShaders");
+		Internal().BAM_GetAllFPObjects           = (SInternal::BAM_GetAllFPObjects_func*)            GetProcAddress(bam_module, "BAM_GetAllFPObjects");
 	};
 
 	namespace dbg {
@@ -424,7 +435,75 @@ namespace BAM {
 			return BAM::Internal().BAM_compileShaders(vertexSrc, fragmentSrc);
 		}
 	}
+
+	namespace fpObjects {
+		template<typename T>
+		inline void foreach(T f)
+		{
+			struct objEntry {
+				const wchar_t* name;
+				int type;
+				void* pUnknown;
+			};
+
+			struct allFpObjects {
+				int num;
+				objEntry* data;
+			};
+
+			// new BAM required v332
+			if (BAM::Internal().BAM_GetAllFPObjects)
+			{
+				allFpObjects* all = reinterpret_cast<allFpObjects*>(BAM::Internal().BAM_GetAllFPObjects());
+				for (int i = 0; i < all->num; ++i)
+				{
+					const auto& obj = all->data[i];
+					f(wtoa(obj.name), obj.type, obj.pUnknown);
+				}
+			}
+		}
+	}
 };
+
+/// <summary>
+/// IDs of Future Pinball objects types
+/// </summary>
+enum {
+	TABLE = 1,
+	SURFACE = 2,
+	FLIPPER = 7,
+	TOY = 18,
+	AUTOPLUNGER = 19,
+	BUMPER = 20,
+	DIVERTER = 21,
+	EMKICKER = 22,
+	KICKER = 23,
+	POPUP = 24,
+	TARGET = 25,
+	DROPTARGET = 26,
+	SWINGTARGET = 27,
+	TARGETVARI = 28,
+	BULB = 29,
+	LIGHT = 30,
+	SHAPEABLELIGHT = 31,
+	GATE = 32,
+	SPINNER = 33,
+	TRIGGER = 34,
+	TRIGGEROPTO = 35,
+	SPINNINGDISK = 36,
+	WALL = 37,
+	FLASHER = 38,
+	HUDDMD = 39,
+	DISPDMD = 40,
+	OVERLAY = 41,
+	HUDSEG = 42,
+	HUDREEL = 43,
+	DISPREEL = 44,
+	DISPSEG = 45,
+	IMAGELIGHT = 46,
+	RUBBER = 47,
+};
+
 /*
 //#ifndef BAM_PLUGIN_C_FUNCTIONS
 //#define BAM_PLUGIN_C_FUNCTIONS

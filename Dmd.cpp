@@ -34,6 +34,17 @@ void CDmd::CreateMenu()
 void CDmd::OnPluginStart()
 {
 	GLenum nGlewError = glewInit();   // now gl context exist, we can initiate glew
+
+	BAM::fpObjects::foreach([](const std::string name, int type, void* pUnknown)
+		{
+			if (type == HUDDMD || type == DISPDMD)
+			{
+				// print name and color of DMD
+				auto pf = reinterpret_cast<float*>(pUnknown);
+				float* pColor = pf + (type == HUDDMD ?  0x8b : 0xce);
+				BAM::dbg::hudDebugLong("dmd: %s, [r=%.3f, g=%.3f, b=%.3f]\n", name.c_str(), pColor[0], pColor[1], pColor[2]);
+			}
+		});
 }
 
 void CDmd::OnPluginStop()
