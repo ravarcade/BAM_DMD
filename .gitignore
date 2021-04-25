@@ -1,0 +1,11 @@
+/Debug
+/Release
+/packages
+/*.sdf
+/*.opensdf
+/.*
+/*.tlb
+/*_h.h
+/*_i.c
+/*_p.c
+/*dlldata.c

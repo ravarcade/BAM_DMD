@@ -1,0 +1,30 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(99012DEA-1AF9-4674-9459-2054EB54D648),
+	dual
+]
+interface IDmdCom : IDispatch
+{
+	[id(0), helpstring("")]
+	HRESULT Msg(
+		[in] BSTR txt);
+
+	// Add here more methods for your COM object if needed
+	// Msg is here for quick testing
+};
+
+[
+	uuid(99012DEA-1AF9-4674-9459-2054EB54D647),
+	version(1.0),
+]
+library DmdComTypeLibraryFileLib
+{
+	[uuid(99012DEA-1AF9-4674-9459-2054EB54D649), helpstring("DmdCom VBScript Type Library")]
+	coclass DmdCom
+	{
+		[default] interface IDmdCom;
+	};
+};
