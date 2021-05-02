@@ -59,4 +59,5 @@ extern "C" {
 
 	BAMEXPORT void BAM_AttachDetours() { MakeDetours(true); }
 	BAMEXPORT void BAM_DetachDetours() { MakeDetours(false); }
+	BAMEXPORT void BAM_swapBuffers() { dmd->OnSwapBuffer(); }
 }

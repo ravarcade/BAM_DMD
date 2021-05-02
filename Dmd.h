@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include <string>
 
 class DmdCom;
 
@@ -11,6 +13,16 @@ private:
 	HMODULE hModule;
 	std::unique_ptr<DmdCom> dmdCom;
 
+	struct CFpDmd
+	{
+		std::string name;
+		int type;
+		void* pUnknown;
+		float* pBaseColor;
+		CFpDmd(std::string, int, void*);
+	};
+	std::vector<CFpDmd> dmds;
+
 public:
 	CDmd() = delete;
 	CDmd(HMODULE hModule, HMODULE bam_module);
@@ -19,5 +31,6 @@ public:
 	void CreateMenu();
 	void OnPluginStart();
 	void OnPluginStop();
+	void OnSwapBuffer();
 	IDispatch* GetDmdCom();
 };

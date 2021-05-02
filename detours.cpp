@@ -17,8 +17,6 @@ REAL(glTexImage2D);
 namespace routed {
 	void APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
 	{
-		static int cnt = 0;
-		BAM::dbg::hudDebug("in detour: %d\n", ++cnt);
 		real::glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 	}
 }

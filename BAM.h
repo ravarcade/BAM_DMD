@@ -66,6 +66,7 @@ namespace BAM {
 
 		typedef BAMIMPORT unsigned int BAM_compileShaders_func(const char *vertexShaderSrc, const char *fragmentShaderSrc);
 		typedef BAMIMPORT void *BAM_GetAllFPObjects_func();
+		typedef BAMIMPORT void BAM_GetDmdAdditionalInfo_func(void* fpObj, bool* pIsFullColor, float* pBackgroundColor, float* pBaseColor, uint32_t* pSecondTextureId);
 
 
 		// debug
@@ -127,6 +128,7 @@ namespace BAM {
 
 		BAM_compileShaders_func           *BAM_compileShaders;
 		BAM_GetAllFPObjects_func          *BAM_GetAllFPObjects;
+		BAM_GetDmdAdditionalInfo_func     *BAM_GetDmdAdditionalInfo;
 	};
 
 	template<typename T>
@@ -210,6 +212,7 @@ namespace BAM {
 
 		Internal().BAM_compileShaders            = (SInternal::BAM_compileShaders_func *)            GetProcAddress(bam_module, "BAM_compileShaders");
 		Internal().BAM_GetAllFPObjects           = (SInternal::BAM_GetAllFPObjects_func*)            GetProcAddress(bam_module, "BAM_GetAllFPObjects");
+		Internal().BAM_GetDmdAdditionalInfo      = (SInternal::BAM_GetDmdAdditionalInfo_func *)      GetProcAddress(bam_module, "BAM_GetDmdAdditionalInfo");
 	};
 
 	namespace dbg {
@@ -461,6 +464,11 @@ namespace BAM {
 					f(wtoa(obj.name), obj.type, obj.pUnknown);
 				}
 			}
+		}
+
+		inline void GetDmdAdditionalInfo(void* pUnknown, bool& outIsDmdFullColor, float(&outBackColor)[3], float(&outBaseColor)[3], uint32_t& outBackTextureId)
+		{
+			BAM::Internal().BAM_GetDmdAdditionalInfo(pUnknown, &outIsDmdFullColor, &outBackColor[0], &outBaseColor[0], &outBackTextureId);
 		}
 	}
 };
