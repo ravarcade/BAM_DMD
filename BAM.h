@@ -67,6 +67,8 @@ namespace BAM {
 		typedef BAMIMPORT unsigned int BAM_compileShaders_func(const char *vertexShaderSrc, const char *fragmentShaderSrc);
 		typedef BAMIMPORT void *BAM_GetAllFPObjects_func();
 		typedef BAMIMPORT void BAM_GetDmdAdditionalInfo_func(void* fpObj, bool* pIsFullColor, float* pBackgroundColor, float* pBaseColor, uint32_t* pSecondTextureId);
+		typedef BAMIMPORT uint64_t BAM_GetFrameCounter_func();
+		typedef BAMIMPORT uint32_t BAM_GetContext_func();
 
 
 		// debug
@@ -129,6 +131,8 @@ namespace BAM {
 		BAM_compileShaders_func           *BAM_compileShaders;
 		BAM_GetAllFPObjects_func          *BAM_GetAllFPObjects;
 		BAM_GetDmdAdditionalInfo_func     *BAM_GetDmdAdditionalInfo;
+		BAM_GetFrameCounter_func          *BAM_GetFrameCounter;
+		BAM_GetContext_func               *BAM_GetContext;
 	};
 
 	template<typename T>
@@ -213,6 +217,8 @@ namespace BAM {
 		Internal().BAM_compileShaders            = (SInternal::BAM_compileShaders_func *)            GetProcAddress(bam_module, "BAM_compileShaders");
 		Internal().BAM_GetAllFPObjects           = (SInternal::BAM_GetAllFPObjects_func*)            GetProcAddress(bam_module, "BAM_GetAllFPObjects");
 		Internal().BAM_GetDmdAdditionalInfo      = (SInternal::BAM_GetDmdAdditionalInfo_func *)      GetProcAddress(bam_module, "BAM_GetDmdAdditionalInfo");
+		Internal().BAM_GetFrameCounter           = (SInternal::BAM_GetFrameCounter_func*)            GetProcAddress(bam_module, "BAM_GetFrameCounter");
+		Internal().BAM_GetContext                = (SInternal::BAM_GetContext_func*)                 GetProcAddress(bam_module, "BAM_GetContext");
 	};
 
 	namespace dbg {
@@ -433,10 +439,19 @@ namespace BAM {
 		};
 	}
 
+	enum DrawContext {
+		CENTER = 0,
+		LEFT,
+		RIGHT,
+		BACKBOX
+	};
+
 	namespace render {
 		inline unsigned int CompileShader(const char *vertexSrc, const char *fragmentSrc) {
 			return BAM::Internal().BAM_compileShaders(vertexSrc, fragmentSrc);
 		}
+		inline uint64_t FrameCounter() { return BAM::Internal().BAM_GetFrameCounter(); }
+		inline DrawContext Context() { return static_cast<DrawContext>(BAM::Internal().BAM_GetContext()); }
 	}
 
 	namespace fpObjects {
