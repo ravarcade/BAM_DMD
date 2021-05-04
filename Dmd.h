@@ -39,6 +39,7 @@ struct CFpDmd
 	char segText[33];
 	int setTextLength;
 	uint32_t *segRawBuffer;
+	uint32_t* segRawBufferWithEffects;
 
 	CFpDmd(std::string, int, void*);
 

@@ -150,7 +150,8 @@ CFpDmd::CFpDmd(std::string name, int type, void* pUnknown)
 		memset(baseColor, 0, sizeof(backColor));
 		segText[sizeof(segText) - 1] = 0;
 		segLength = reinterpret_cast<uint32_t*>(pUnknown)[0xa1];
-		segRawBuffer = reinterpret_cast<uint32_t *>(pUnknown) + 0x3be;
+		segRawBufferWithEffects = reinterpret_cast<uint32_t**>(pUnknown)[0x2bd]+0x166;
+		segRawBuffer = reinterpret_cast<uint32_t**>(pUnknown)[0x2bc] + 0x166;
 	}
 	refresh();
 }
@@ -210,7 +211,8 @@ void CFpDmd::dump()
 		break;
 
 	case DISPSEG:
-		BAM::dbg::hudDebug("%s is %s\n - is on %s\n - color = [%.3f, %.3f, %.3f]\n - segType = %s\n - segAlign = %s\n - text = %s\n\n",
+		if (false)
+		BAM::dbg::hudDebug("%s is %s\n - is on %s\n - color = [%.3f, %.3f, %.3f]\n - segType = %s\n - segAlign = %s\n - text = %s\n",
 			name.c_str(),
 			typeAsString(type),
 			isOnBackbox ? "backbox" : "playfield",
@@ -218,6 +220,15 @@ void CFpDmd::dump()
 			segTypeAsString(segType),
 			segAlignAsString(segAlign),
 			segText);
+
+		BAM::dbg::hudDebug("%s: ", name.c_str());
+		BAM::dbg::hudDebug("[");
+		for (int i = 0; i < segLength; ++i)
+		{
+			if (i!=0) BAM::dbg::hudDebug("|");
+			BAM::dbg::hudDebug("%04x", segRawBufferWithEffects[i]);
+		}
+		BAM::dbg::hudDebug("]\n");
 		break;
 	}
 }
