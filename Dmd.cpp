@@ -39,7 +39,7 @@ void CDmd::OnPluginStart()
 	BAM::fpObjects::foreach([this](const std::string name, int type, void* pUnknown)
 		{
 			
-			if (type == HUDDMD || type == DISPDMD || type == DISPSEG)
+			if (type == HUDDMD || type == DISPDMD || type == DISPSEG || type == HUDSEG)
 			{
 				dmds.emplace_back(CFpDmd{name, type, pUnknown});
 
@@ -88,6 +88,7 @@ namespace {
 		case DISPDMD: return "DispDMD";
 		case HUDDMD: return "HudDMD";
 		case DISPSEG: return "DispSEG";
+		case HUDSEG: return "HudSEG";
 		}
 		return "Unknown";
 	};
@@ -152,6 +153,16 @@ CFpDmd::CFpDmd(std::string name, int type, void* pUnknown)
 		segLength = reinterpret_cast<uint32_t*>(pUnknown)[0xa1];
 		segRawBufferWithEffects = reinterpret_cast<uint32_t**>(pUnknown)[0x2bd]+0x166;
 		segRawBuffer = reinterpret_cast<uint32_t**>(pUnknown)[0x2bc] + 0x166;
+		break;
+
+	case HUDSEG:
+		memset(backColor, 0, sizeof(backColor));
+		memset(baseColor, 0, sizeof(backColor));
+		segText[sizeof(segText) - 1] = 0; 
+		segLength = reinterpret_cast<uint32_t*>(pUnknown)[0x72];
+		segRawBufferWithEffects = reinterpret_cast<uint32_t**>(pUnknown)[0x23b] + 0x166;
+		segRawBuffer = reinterpret_cast<uint32_t**>(pUnknown)[0x23a] + 0x166;
+		break;
 	}
 	refresh();
 }
@@ -189,6 +200,22 @@ void CFpDmd::refresh()
 		setTextLength = strlen(segText);
 		break;
 	}
+	case HUDSEG:
+	{
+		auto pui = reinterpret_cast<uint32_t*>(pUnknown);
+		uint32_t col = pui[0x89];
+		tmpColor[0] = (col & 0xff) / 255.0f;
+		tmpColor[1] = ((col >> 8) & 0xff) / 255.0f;
+		tmpColor[2] = ((col >> 16) & 0xff) / 255.0f;
+		color = tmpColor;
+		segType = pui[0x70];
+		segAlign = pui[0x76];
+		segCharShapes = pui + 0xa6;
+		auto pTxt = reinterpret_cast<char*>(pui + 0x23c);
+		strcpy_s(segText, sizeof(segText) - 1, pTxt);
+		setTextLength = strlen(segText);
+		break;
+	}
 	}
 }
 
@@ -211,6 +238,7 @@ void CFpDmd::dump()
 		break;
 
 	case DISPSEG:
+	case HUDSEG:
 		if (false)
 		BAM::dbg::hudDebug("%s is %s\n - is on %s\n - color = [%.3f, %.3f, %.3f]\n - segType = %s\n - segAlign = %s\n - text = %s\n",
 			name.c_str(),
